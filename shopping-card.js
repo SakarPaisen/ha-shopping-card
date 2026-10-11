@@ -6,7 +6,7 @@
  * https://github.com/jan-tdy/ha-shopping-card
  */
 
-const CARD_VERSION = "0.3.0";
+const CARD_VERSION = "0.4.0";
 const CARD_TAG = "shopping-card";
 const EDITOR_TAG = "shopping-card-editor";
 
