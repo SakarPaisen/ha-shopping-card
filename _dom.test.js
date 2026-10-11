@@ -56,6 +56,9 @@ console.log('add-name preserved :', JSON.stringify(afterName.value));
 console.log('search   preserved :', JSON.stringify(afterSearch.value));
 console.log('focus restored     :', card.shadowRoot.activeElement === afterName);
 
-const ok = afterName.value === 'Half typed' && afterSearch.value === 'mil';
+const ok =
+  afterName.value === 'Half typed' &&
+  afterSearch.value === 'mil' &&
+  card.shadowRoot.activeElement === afterName;
 console.log(ok ? 'PASS' : 'FAIL');
 process.exit(ok ? 0 : 1);
