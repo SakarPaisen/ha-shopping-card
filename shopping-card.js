@@ -596,6 +596,7 @@ class ShoppingCard extends HTMLElement {
       ".add-price",
       ".add-description",
       ".edit-name",
+      ".edit-qty",
       ".edit-category",
       ".edit-price",
       ".edit-description",
@@ -606,25 +607,42 @@ class ShoppingCard extends HTMLElement {
   _captureFieldState() {
     const state = {};
     const active = this.shadowRoot && this.shadowRoot.activeElement;
+    const entity = this._config?.entity;
     for (const selector of this._liveFields()) {
       const el = this.shadowRoot.querySelector(selector);
       if (!el) continue;
-      state[selector] = { value: el.value, focused: el === active };
+      const editRow = el.closest(".item.editing");
+      state[selector] = {
+        value: el.value,
+        focused: el === active,
+        entity,
+        editUid: editRow ? editRow.dataset.uid : null,
+      };
     }
     return state;
   }
 
   _restoreFieldState(state) {
     if (!state) return;
+    const entity = this._config?.entity;
     let refocus = null;
     for (const selector of this._liveFields()) {
       const saved = state[selector];
-      if (!saved) continue;
+      // A capture from a different entity (setConfig() switched the list)
+      // must never seed this entity's form.
+      if (!saved || saved.entity !== entity) continue;
       const el = this.shadowRoot.querySelector(selector);
       if (!el) continue;
-      // Only fill a field the rebuild left empty, so values written by the card itself
-      // (the edit form's own value attributes) are not overwritten by a stale capture.
-      if (el.value === "") {
+      if (saved.editUid !== null) {
+        // Edit fields are always populated by the rebuild (the item's current value),
+        // so "only fill empty" never restores a typed edit. Carry the draft over only
+        // when the rebuild is still the same item's edit row.
+        const editRow = el.closest(".item.editing");
+        if (!editRow || editRow.dataset.uid !== saved.editUid) continue;
+        el.value = saved.value;
+      } else if (el.value === "") {
+        // Only fill a field the rebuild left empty, so values written by the card itself
+        // are not overwritten by a stale capture.
         el.value = saved.value;
       }
       if (saved.focused) refocus = el;
